@@ -8,7 +8,7 @@ var db = require("./db/db.json");
 
 // Sets up Express App
 var app = express();
-var PORT =  process.env.PORT || 8000;
+var PORT = process.env.PORT || 8000;
 
 // Sets up express app to handle data parsing
 app.use(express.urlencoded({ extended: true }));
@@ -19,45 +19,51 @@ app.use(express.static("public"));
 
 // Basic route for users
 // =====================
-app.get("/notes", function(req, res) {
-    res.sendFile(path.join(__dirname, "./public/notes.html"));
-})
+app.get("/notes", function (req, res) {
+  res.sendFile(path.join(__dirname, "./public/notes.html"));
+});
 
-app.get("/api/notes", function(req, res) {
-    res.json(db)
-})
+app.get("/api/notes", function (req, res) {
+  res.json(db);
+});
 
 //  Catch-All
-app.get("*", function(req, res) {
-    res.sendFile(path.join(__dirname, "./public/index.html"));
-})
+app.get("*", function (req, res) {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
 
 // POST db.json
-app.post("/api/notes", function(req, res){
-    let notes = req.body;
-    notes.id = db.length + 1;
-    
-    db.push(notes);
+app.post("/api/notes", function (req, res) {
+    // Selects the body of text
+        let notes = req.body;
+    // Adds an id key to the object notes 
+        notes.id = notes.title
+    // pushes the note to the db array
+        db.push(notes);
 
-    // Writes the new array (after stringifiy'ing it) to the api/notes json page
-    fs.writeFile("./db/db.json", JSON.stringify(db), function(err) {
-        if (err) {
-            console.log("err"),
-            res.sendStatus(404) }
-
-        else(console.log(200),
-            res.sendStatus(200)
-        )
-    })
-})
+  // Writes the new array (after stringifiy'ing it) to the api/notes json page
+  fs.writeFile("./db/db.json", JSON.stringify(db), function (err) {
+    if (err) {
+      console.log("err"), res.sendStatus(404);
+    } else console.log(200), res.sendStatus(200);
+  });
+});
 
 // DELETE specific JSON date using an id
-app.get("api/notes/:id", function(req, res) {
-    var deleteThis = req.params.id;
-    console.log(deleteThis)
-})
+app.delete("/api/notes/:id", function (req, res) {
+    let deleteThis = req.params.id;
+    
+    for (var i = 0; i < db.length; i++) {
+  
+      if (deleteThis === db[i].id) {
+        db.splice([i], 1);
+        res.json(db)
+      } 
+  }
+  });
+  
 
 // App listener
-app.listen(PORT, function(){
-    console.log("App is listening on http://localhost:" + PORT)
-})
+app.listen(PORT, function () {
+  console.log("App is listening on http://localhost:" + PORT);
+});
